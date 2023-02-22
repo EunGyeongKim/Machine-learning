@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-
+# Commented out IPython magic to ensure Python compatibility.
 import numpy as np
 import matplotlib.pyplot as plt
 # %matplotlib inline
 
+# 1D
 #create data
 np.random.seed(seed=1)
 x_min = 4
@@ -23,7 +23,7 @@ plt.show()
 from mpl_toolkits.mplot3d import Axes3D
 
 # mse 함수
-def mes_line(x, t, w):
+def mse_line(x, t, w):
     y = w[0] * x + w[1]
     mse = np.mean((y-t)**2)
     return mse
@@ -39,7 +39,7 @@ j = np.zeros((len(x0), len(x1)))
 
 for i0 in range(xn):
     for i1 in range(xn):
-        j[i1, i0] = mes_line(x, t, (x0[i0], x1[i1]))
+        j[i1, i0] = mse_line(x, t, (x0[i0], x1[i1]))
 
 #graph
 plt.figure(figsize = (9.5, 4))
@@ -95,7 +95,7 @@ xx0, xx1 = np.meshgrid(x0, x1)
 j = np.zeros((len(x0), len(x1)))
 for i0 in range(xn):
     for i1 in range(xn):
-        j[i1, i0] = mes_line(x, t, (x0[i0], x1[i1]))
+        j[i1, i0] = mse_line(x, t, (x0[i0], x1[i1]))
 cont = plt.contour(xx0, xx1, j, 30, colors='black', levels=(100, 1000, 10000, 100000))
 cont.clabel(fmt='%1.0f', fontsize = 8)
 plt.grid(True)
@@ -106,7 +106,7 @@ W0, W1, dMSE, W_history = fit_line_num(x, t)
 # result
 print('반복횟수 {0}'.format(W_history.shape[0]))
 print('W=[{0: .6f}. {1:6f}]'.format(dMSE[0], dMSE[1]))
-print('MSE={0:.6f}'.format(mes_line(x, t, [W0, W1])))
+print('MSE={0:.6f}'.format(mse_line(x, t, [W0, W1])))
 plt.plot(W_history[:,0], W_history[:,1], '.-', color = 'gray', markersize = 10, markeredgecolor='cornflowerblue')
 plt.show()
 
@@ -117,7 +117,7 @@ def show_line(w):
 
 plt.figure(figsize=(4,4))
 W = np.array([W0, W1])
-mse = mes_line(x, t, W)
+mse = mse_line(x, t, W)
 print('w0={0:.3f}, w1 = {1:.3f}'.format(W0, W1))
 print('SD = {0:.3f} cm'.format(np.sqrt(mse)))
 show_line(W)
@@ -126,7 +126,27 @@ plt.xlim(x_min, x_max)
 plt.grid(True)
 plt.show()
 
+# 해석해
+def fit_line(x, t):
+    mx = np.mean(x)
+    mt = np.mean(t)
+    mtx = np.mean(t*x)
+    mxx = np.mean(x*x)
+    w0 = (mtx - mt * mx) / (mxx - mx**2)
+    w1 = mt - w0 * mx
+    return np.array([w0, w1])
 
+# main
+W = fit_line(x, t)
+print("w0={0:.3f}, w1={1:.3f}".format(W[0], W[1]))
+mse = mse_line(x, t, W)
+print("SD={0:.3f}cm".format(np.sqrt(mse)))
+plt.figure(figsize = (4,4))
+show_line(W)
+plt.plot(x, t, marker='o', linestyle='None', color='cornflowerblue', markeredgecolor = 'black')
+plt.xlim(x_min, x_max)
+plt.grid(True)
+plt.show()
 
 
 
